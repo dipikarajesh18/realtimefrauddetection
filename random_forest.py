@@ -35,10 +35,11 @@ columns = [i for i in df.columns if i!='Class']
 #Convert the spark dataframe into Pandas for preprocessing
 imputeDF = df
 imputeDF_Pandas = imputeDF.toPandas()
+imputeDF_Pandas['Amount']=preprocessing.scale(imputeDF_Pandas['Amount'])
 
 #Split the dataframe into features (X) and labels (Y) format followed by pandas
-X = imputeDF.toPandas().filter(items=columns)
-Y = imputeDF.toPandas().filter(items=['Class'])
+X = imputeDF_Pandas.filter(items=columns)
+Y = imputeDF_toPandas.filter(items=['Class'])
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=0)
 
 #Apply oversampling method SMOTE to the dataset
