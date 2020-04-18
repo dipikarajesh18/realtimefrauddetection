@@ -2,39 +2,10 @@ import csv
 from time import sleep 
 from json import dumps
 from kafka import KafkaProducer
-# from pyspark.sql import SparkSession
-# from pyspark import SparkContext
-# from pyspark.streaming import StreamingContext
-# from pyspark.streaming.kafka import KafkaUtils, TopicAndPartition, KafkaRDD, OffsetRange
-# from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
-# from pyspark.sql.functions import col, from_json
-# from pyspark.sql.functions import to_json, col, struct
-
-
-def spark_batch_produce():
-	spark=SparkSession.builder.appName("SparkPublishfail").getOrCreate()
-
-	data2=[[1,"James ","","Smith",2018,1,"M",3000],
-		   [2,"Michael ","Rose","",2010,3,"M",4000],
-		   [3,"Robert ","","Williams",2010,3,"M",4000]
-		   [4,"Maria ","Anne","Jones",2005,5,"F",4000],
-		   [5,"Jen ","Mary","Brown",2010,7,"",-1]
-
-		   ]
-
-	columns=["id","firstname","middlename","lastname","dob_year","dob_month","gender","salary"]
-
-	df2=data2.toDF(*columns)
-
-	df2.toJSON\
-		.write\
-		.format("kafka")\
-		.option("kafka.bootstrap_servers","localhost:9092")\
-		.option("topic","useless_topic")
-
 
 producer=KafkaProducer(bootstrap_servers=['localhost:9092'],value_serializer=lambda x:dumps(x).encode('utf-8'))
 
+#Create streaming instances using the CSV file
 with open('creditcard.csv') as csv_file:
 	csv_reader=csv.reader(csv_file)
 	line_count=0
@@ -81,65 +52,3 @@ with open('creditcard.csv') as csv_file:
 		sleep(1)
 
 	print(f'Processed {line_count} lines.')
-# tempSchema=StructType([
-# 		StructField('id',IntegerType(),True),
-# 		StructField('firstname',StringType(),True),
-# 		StructField('middlename',StringType(),True),
-# 		StructField('lastname',StringType(),True),
-# 		StructField('dob_year',IntegerType(),True),
-# 		StructField('dob_month',IntegerType(),True),
-# 		StructField('gender',StringType(),True),
-# 		StructField('salary',IntegerType(),True)
-# 		])
-
-# spark=SparkSession.builder.appName("SparkPublishfail").getOrCreate()
-
-# data2=[
-# 		(1,"James ","","Smith",2018,1,"M",3000),
-# 		(2,"Michael ","Rose","",2010,3,"M",4000),
-# 		(3,"Robert ","","Williams",2010,3,"M",4000),
-# 		(4,"Maria ","Anne","Jones",2005,5,"F",4000),
-# 		(5,"Jen ","Mary","Brown",2010,7,"",-1)
-# 	]
-# columns=["id","firstname","middlename","lastname","dob_year","dob_month","gender","salary"]
-
-# # df2=data2.toDF(*columns)
-# df2=spark.createDataFrame(data2,tempSchema)
-# df2.printSchema()
-# df2.show()
-
-# df2.write\
-# 	.format("kafka")\
-# 	.option("kafka.bootstrap_servers","localhost:9092")\
-# 	.option("topic","new_useless")
-
-# df2.select(to_json(struct([col(c).alias(c) for c in df2.columns])))\
-# 	.write\
-# 	.format("kafka")\
-# 	.option("kafka.bootstrap.servers", "localhost:9092")\
-# 	.option("topic", "new_useless")\
-# 	.save()
-
-
-# ds = df2 \
-#   .writeStream \
-#   .format("kafka") \
-#   .option("kafka.bootstrap.servers", "localhost:9092") \
-#   .option("topic", "new_useless") \
-#   .start()
-
-# df2\
-# 	.write \
-# 	.format("kafka") \
-# 	.option("kafka.bootstrap.servers", "host1:port1,host2:port2") \
-# 	.option("topic", "topic1") \
-# 	.save()
-
-# query = df \
-#   .selectExpr("CAST(userId AS STRING) AS key", "to_json(struct(*)) AS value") \
-#   .writeStream \
-#   .format("kafka") \
-#   .option("kafka.bootstrap.servers", "host1:port1,host2:port2") \
-#   .option("topic", "topic1") \
-#   .option("checkpointLocation", "/path/to/HDFS/dir") \
-#   .start()

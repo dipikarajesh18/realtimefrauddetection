@@ -20,7 +20,6 @@ from pyspark.mllib.linalg import Vectors
 from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.tree import RandomForest
 from time import *
-# from sklearn.metrics import classification_report, confusion_matrix
 
 
 offsetRanges = []
@@ -51,7 +50,6 @@ def process(time, rdd):
 
     try:
         # Get the singleton instance of SparkSession
-        # print("!!!!!!!!!!!!       got in  !!!!!!!!!!!!!!!!!!!!!")
         spark = getSparkSessionInstance(rdd.context.getConf())
 
         # Convert RDD[String] to RDD[Row] to DataFrame
@@ -60,7 +58,7 @@ def process(time, rdd):
         wordsDataFrame = spark.createDataFrame(rowRdd)
         # wordsDataFrame.printSchema()
         print(wordsDataFrame)
-        wordsDataFrame.write.format("csv").save("/Users/bharathsurianarayanan/Desktop/dfstore.csv")
+        wordsDataFrame.write.format("csv").save("/Users/prasannasurianarayanan/Desktop/dfstore.csv")
         # Creates a temporary view using the DataFrame.
         wordsDataFrame.createOrReplaceTempView("words")
 
@@ -75,48 +73,6 @@ def process(time, rdd):
 if __name__ == "__main__":
 
 	spark=SparkSession.builder.appName("SparkPublishfail").getOrCreate()
-
-	CSV_PATH = "creditcard.csv"
-	APP_NAME = "Random Forest Example"
-	SPARK_URL = "local[*]"
-	RANDOM_SEED = 13579
-	RF_NUM_TREES = 3
-	RF_MAX_DEPTH = 4
-	RF_NUM_BINS = 32
-
-
-	# In[63]:
-
-
-	df = spark.read     .options(header = "true", inferschema = "true")     .csv(CSV_PATH)
-
-	print("Total number of rows: %d" % df.count())
-	len(df.columns)
-
-	transformed_df = df.rdd.map(lambda row: LabeledPoint(row[-1], Vectors.dense(row[0:-1])))
-
-
-	training_data, test_data = transformed_df.randomSplit([0.7,0.3], 0)
-
-	print("Number of training set rows: %d" % training_data.count())
-	print("Number of test set rows: %d" % test_data.count())
-
-
-	# In[68]:
-
-
-	from pyspark.mllib.tree import RandomForest
-	from time import *
-
-	start_time = time()
-
-	model = RandomForest.trainClassifier(training_data, numClasses=2, categoricalFeaturesInfo={},     numTrees=RF_NUM_TREES, featureSubsetStrategy="auto", impurity="gini",     maxDepth=RF_MAX_DEPTH, seed=0)
-
-	end_time = time()
-	elapsed_time = end_time - start_time
-	print("Time to train model: %.3f seconds" % elapsed_time)
-
-
 
 	kafkaTransactionSchema=StructType([
 	StructField('cc_num',StringType(),True),
@@ -158,7 +114,6 @@ if __name__ == "__main__":
 	
 ])
 
-
 	nestTimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.sss'Z'"
 
 	jsonOptions = { "timestampFormat": nestTimestampFormat }
@@ -167,10 +122,7 @@ if __name__ == "__main__":
 	.format("kafka") \
 	.option("kafka.bootstrap.servers", "localhost:9092") \
 	.option("subscribe", "useless_topic") \
-	.load() #\
-		# .select(from_json(col("value").cast("string"), kafkaCreditCardSchema, jsonOptions).alias("parsed_value"))
-	# parsed.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-	# parsed.printSchema()
+	.load() 
 	parsed=parsed.select(col("key").cast("string"),from_json(col("value").cast("string"), kafkaCreditCardSchema))
 	parsed.printSchema() 
 	
@@ -207,9 +159,9 @@ if __name__ == "__main__":
 				"jsontostructs(CAST(value AS STRING)).Amount"
 			)
 
+	model = RandomForestClassifier.load('randomforestmodel_saved')
 	predictions = model.predict(newFields.rdd.map(lambda x: x.features))
 	
-
 	#write predictions to output sink fraud topic
 	# read from the topic directly using the console to view the predictions
 	query = predictions \
