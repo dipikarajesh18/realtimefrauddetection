@@ -6,7 +6,7 @@ from kafka import KafkaProducer
 producer=KafkaProducer(bootstrap_servers=['localhost:9092'],value_serializer=lambda x:dumps(x).encode('utf-8'))
 
 #Create streaming instances using the CSV file
-with open('creditcard.csv') as csv_file:
+with open('creditcardsimulations.csv') as csv_file:
 	csv_reader=csv.reader(csv_file)
 	line_count=0
 	for row in csv_reader:
