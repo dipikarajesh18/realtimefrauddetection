@@ -88,4 +88,4 @@ y_pred = predictions.select(['prediction']).collect()
 print(classification_report(y_true, y_pred))
 
 #Save the weights in the model to use this trained model for predictions
-model.write().overwrite().save("randomforestmodel_saved")
+model.write().overwrite().save("/randomforestmodel_saved")
