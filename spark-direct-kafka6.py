@@ -21,52 +21,6 @@ from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.tree import RandomForest
 from time import *
 
-
-offsetRanges = []
-
-def storeOffsetRanges(rdd):
-	global offsetRanges
-	offsetRanges = rdd.offsetRanges()
-	return rdd
-
-def printOffsetRanges(rdd):
-	for o in offsetRanges:
-		print "#########%s %s %s %s###########" % (o.topic, o.partition, o.fromOffset, o.untilOffset)
-
-def process_dstream(rdd):
-	rdd.foreachPartition(lambda iter: do_some_work(iter))
-	krdd=KafkaRDD(rdd._jrdd,sc,rdd._jrdd_deserializer)
-	off_ranges=krdd.offsetRanges()
-
-	for o in off_ranges:
-		x='###################'+str(o)+"#############"
-		print(x)
-
-def process(time, rdd):
-    print("========= %s =========" % str(time))
-
-    try:
-        # Get the singleton instance of SparkSession
-        spark = getSparkSessionInstance(rdd.context.getConf())
-
-        # Convert RDD[String] to RDD[Row] to DataFrame
-        rowRdd = rdd.map(lambda w: Row(word=w))
-        # rowRdd.pprint()
-        wordsDataFrame = spark.createDataFrame(rowRdd)
-        # wordsDataFrame.printSchema()
-        print(wordsDataFrame)
-        wordsDataFrame.write.format("csv").save("/Users/prasannasurianarayanan/Desktop/dfstore.csv")
-        # Creates a temporary view using the DataFrame.
-        wordsDataFrame.createOrReplaceTempView("words")
-
-        # Do word count on table using SQL and print it
-        wordCountsDataFrame = \
-            spark.sql("select word, count(*) as total from words group by word")
-        # wordCountsDataFrame.show()
-    except:
-        pass
-
-
 if __name__ == "__main__":
 
 	spark=SparkSession.builder.appName("SparkPublishfail").getOrCreate()
@@ -75,7 +29,9 @@ if __name__ == "__main__":
 	StructField('cc_num',StringType(),True),
 	StructField('first',StringType(),True)
 	])
-
+	
+	
+	#Create the Schema for the dataset
 	kafkaCreditCardSchema=StructType([
 	StructField('Time',StringType(),True),
 	StructField('V1',StringType(),True),
@@ -156,11 +112,12 @@ if __name__ == "__main__":
 				"jsontostructs(CAST(value AS STRING)).Amount"
 			)
 
+	#load the pretrained machine learning model and use it to predict the incoming schema
 	model = RandomForestClassifier.load('randomforestmodel_saved')
 	predictions = model.predict(newFields.rdd.map(lambda x: x.features))
 	
 	#write predictions to output sink fraud topic
-	# read from the topic directly using the console to view the predictions
+	#read from the topic directly using the console to view the predictions
 	query = predictions \
 			.writeStream \
 			.format("kafka") \
