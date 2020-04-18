@@ -1,3 +1,5 @@
+Dataset used - https://www.kaggle.com/mlg-ulb/creditcardfraud
+
 kafkaproducer.py is used to send data from csv file to the Kakfa Topics. 
 
 random_forest.py trains and saves the Random Forest Machine Learning model into the binary randomforestmodel_saved. 
