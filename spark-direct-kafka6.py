@@ -33,9 +33,6 @@ def printOffsetRanges(rdd):
 	for o in offsetRanges:
 		print "#########%s %s %s %s###########" % (o.topic, o.partition, o.fromOffset, o.untilOffset)
 
-def do_some_work(rdd):
-	pass
-
 def process_dstream(rdd):
 	rdd.foreachPartition(lambda iter: do_some_work(iter))
 	krdd=KafkaRDD(rdd._jrdd,sc,rdd._jrdd_deserializer)
