@@ -32,7 +32,7 @@ CSV_PATH = "creditcard.csv"
 df = spark.read.csv(CSV_PATH, inferSchema=True, header=True)
 columns = [i for i in df.columns if i!='Class']
 
-#Convert the spark dataframe into Pandas for applying SMOTE - oversampling method
+#Convert the spark dataframe into Pandas for preprocessing
 imputeDF = df
 imputeDF_Pandas = imputeDF.toPandas()
 
